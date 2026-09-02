@@ -26,7 +26,8 @@ Web Dashboard (Vue 3) ────────┘
 security-patrol/
 ├── backend/    Laravel 12 (REST API v1, Sanctum, MySQL) + 33 test
 ├── frontend/   Vue 3 + Vite + Bootstrap 5 + Pinia + Leaflet
-├── docs/       API_SPEC.md (untuk Android) + DEPLOYMENT.md (panduan server)
+├── android/    Aplikasi Android Kotlin (Retrofit + QR ZXing + GPS + offline sync)
+├── docs/       API_SPEC.md (untuk Android) + DEPLOYMENT.md (panduan server) + ANDROID_BUILD.md
 └── scripts/    pembantu dev: smoke-test.sh, e2e-patrol-test.sh, mysql*.sh
 ```
 
@@ -67,6 +68,15 @@ cd backend && php artisan test        # 33 test, 117 assertions
 bash ../scripts/smoke-test.sh        # uji HTTP dasar (server harus jalan)
 bash ../scripts/e2e-patrol-test.sh   # alur patroli penuh via HTTP
 ```
+
+## Aplikasi Android
+
+Folder `android/` berisi project Android Studio (Kotlin) untuk petugas security:
+login, jadwal hari ini, mulai patroli (GPS), scan QR checkpoint (ZXing),
+progress real-time, selesai/batal patroli, riwayat + detail, dan **offline sync**
+(WorkManager kirim batch ke `POST /sync` saat koneksi pulih).
+
+Build & panduan lengkap: **[docs/ANDROID_BUILD.md](docs/ANDROID_BUILD.md)**.
 
 ## Deployment
 

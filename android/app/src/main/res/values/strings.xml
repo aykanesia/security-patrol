@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Security Patrol</string>
+
+    <string name="login_title">Masuk</string>
+    <string name="login_subtitle">Sistem Monitoring Patroli Security</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_login">MASUK</string>
+    <string name="login_error_generic">Gagal masuk. Periksa kembali username/password.</string>
+    <string name="login_role_denied">Akun ini tidak memiliki akses aplikasi patroli (bukan role security).</string>
+    <string name="login_loading">Memeriksa…</string>
+
+    <string name="tab_today">Jadwal Hari Ini</string>
+    <string name="tab_history">Riwayat</string>
+
+    <string name="date_today_fmt">%1$s, %2$s</string>
+    <string name="empty_schedules">Tidak ada jadwal patroli untuk hari ini.</string>
+    <string name="empty_history">Belum ada riwayat patroli.</string>
+    <string name="empty_detail_checkins">Belum ada check-in pada sesi ini.</string>
+
+    <string name="btn_start_patrol">Mulai Patroli</string>
+    <string name="btn_resume">Lanjut Patroli</string>
+    <string name="btn_scan">SCAN CHECKPOINT</string>
+    <string name="btn_complete">SELESAI PATROLI</string>
+    <string name="btn_cancel">Batalkan</string>
+    <string name="btn_retry">Coba Lagi</string>
+
+    <string name="running_banner_title">Patroli sedang berjalan</string>
+    <string name="running_banner_subtitle">%1$s · %2$d/%3$d checkpoint</string>
+
+    <string name="started_at_label">Mulai</string>
+    <string name="route_label">Rute</string>
+    <string name="area_label">Area</string>
+    <string name="progress_label">%1$d / %2$d checkpoint</string>
+
+    <string name="status_COMPLETED">COMPLETED</string>
+    <string name="status_RUNNING">RUNNING</string>
+    <string name="status_INCOMPLETE">INCOMPLETE</string>
+    <string name="status_CANCELLED">CANCELLED</string>
+    <string name="cp_COMPLETED">Selesai</string>
+    <string name="cp_PENDING">Belum</string>
+
+    <string name="toast_location_needed">Aktifkan GPS / izin lokasi untuk memulai patroli.</string>
+    <string name="toast_location_fail">Tidak dapat mengambil lokasi. Coba lagi.</string>
+    <string name="toast_scan_cancelled">Pemindaian dibatalkan.</string>
+    <string name="toast_no_camera">Perangkat tidak memiliki kamera.</string>
+    <string name="need_location_permission">Izin lokasi diperlukan untuk verifikasi GPS.</string>
+    <string name="need_camera_permission">Izin kamera diperlukan untuk memindai QR.</string>
+
+    <string name="msg_scan_valid">Checkpoint %1$s valid ✓ (jarak %2$d m)</string>
+    <string name="msg_already_processed">Checkpoint sudah diproses sebelumnya.</string>
+    <string name="msg_offline_saved">Tersimpan offline — akan disinkronkan otomatis.</string>
+    <string name="msg_complete_ok">Patroli selesai. Terima kasih!</string>
+    <string name="msg_cancel_ok">Patroli dibatalkan.</string>
+    <string name="msg_need_all_cp">Semua checkpoint wajib harus dikunjungi dulu.</string>
+
+    <string name="error_title">Terjadi kesalahan</string>
+    <string name="dialog_ok">OK</string>
+
+    <string name="permission_location_rationale">Aplikasi perlu lokasi untuk memvalidasi kunjungan checkpoint.</string>
+    <string name="permission_camera_rationale">Aplikasi perlu kamera untuk memindai QR checkpoint.</string>
+
+    <string name="confirm_cancel_title">Batalkan patroli?</string>
+    <string name="confirm_cancel_msg">Sesi patroli ini akan ditandai CANCELLED.</string>
+    <string name="confirm_complete_title">Selesaikan patroli?</string>
+    <string name="confirm_complete_msg">Pastikan seluruh checkpoint wajib sudah dikunjungi.</string>
+    <string name="confirm_logout">Keluar dari akun ini?</string>
+    <string name="menu_logout">Keluar</string>
+    <string name="patrol_detail_title">Detail Sesi</string>
+    <string name="duration_label">Durasi</string>
+    <string name="checkin_status_label">Status Validasi</string>
+
+    <!-- dipakai di kode -->
+    <string name="login_required_fields">Username dan password wajib diisi.</string>
+    <string name="cp_count_fmt">%1$d checkpoint</string>
+    <string name="duration_short_fmt">Durasi %1$s</string>
+    <string name="progress_short_fmt">%1$d/%2$d selesai</string>
+    <string name="distance_fmt">jarak %1$d m</string>
+    <string name="cp_code_seq_fmt">%1$s · urutan %2$d</string>
+    <string name="patrol_active_title">Patroli Berjalan</string>
+    <string name="patrol_no_active_msg">Tidak ada patroli yang sedang berjalan.</string>
+    <string name="time_start_fmt">Mulai %1$s</string>
+    <string name="time_end_fmt">Selesai %1$s</string>
+    <string name="scan_prompt">Arahkan kamera ke QR Code checkpoint</string>
+    <string name="scan_processing">Memvalidasi…</string>
+    <string name="msg_invalid_location">Anda berada di luar radius checkpoint.</string>
+    <string name="msg_duplicate">Checkpoint sudah discan sebelumnya.</string>
+    <string name="msg_invalid_sequence">Urutan checkpoint belum benar. Kunjungi checkpoint sesuai urutan.</string>
+    <string name="msg_invalid_checkpoint">QR Code tidak dikenali.</string>
+    <string name="msg_session_ended">Sesi patroli sudah berakhir.</string>
+    <string name="officer_fmt">Petugas: %1$s</string>
+    <string name="route_fmt">Rute: %1$s</string>
+    <string name="schedule_fmt">Jadwal: %1$s</string>
+    <string name="progress_title">Progress Patroli</string>
+    <string name="checkpoint_list_title">Daftar Checkpoint</string>
+    <string name="checkin_list_title">Riwayat Check-in</string>
+    <string name="ended_at_label">Selesai</string>
+    <string name="checkpoint_label">Checkpoint</string>
+    <string name="msg_start_failed_location">Gagal mendapatkan lokasi. Pastikan GPS aktif.</string>
+    <string name="patrol_started_msg">Patroli dimulai</string>
+    <string name="msg_scan_online_valid">Checkpoint %1$s valid</string>
+</resources>
