@@ -1,0 +1,17 @@
+# backend/.dockerignore — hal-hal yang TIDAK ikut ke image
+.git
+.gitignore
+Dockerfile
+.dockerignore
+.env
+.env.*
+!.env.example
+vendor
+tests
+phpunit.xml
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
+!storage/app/.gitignore

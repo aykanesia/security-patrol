@@ -1,0 +1,110 @@
+name: security-patrol
+
+# ============================================================
+# Security Patrol — Docker Compose (produksi/dev)
+# Jalankan:  cp .env.example .env  →  docker compose up -d --build
+# Web:       http://localhost:8080
+# API:       http://localhost:8080/api/v1
+# Health:    http://localhost:8080/up
+# ============================================================
+
+services:
+  # ---------- MySQL 8 ----------
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-security_patrol}
+      MYSQL_USER: ${DB_USERNAME:-patrol}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD di .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD di .env}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # ---------- Backend Laravel (PHP-FPM) ----------
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_LOCALE: id
+      APP_TIMEZONE: Asia/Jakarta
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-security_patrol}
+      DB_USERNAME: ${DB_USERNAME:-patrol}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: 120
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: error
+      FILESYSTEM_DISK: local
+      # APP_KEY: kosongkan → dibuat otomatis & disimpan di volume backenddata
+      APP_KEY: ${APP_KEY:-}
+    volumes:
+      - backend_storage:/var/www/html/storage
+      - backend_bootstrap_cache:/var/www/html/bootstrap/cache
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose:
+      - "9000"
+
+  # ---------- Scheduler Laravel (cron schedule:run tiap menit) ----------
+  scheduler:
+    build: ./backend
+    restart: unless-stopped
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_LOCALE: id
+      APP_TIMEZONE: Asia/Jakarta
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-security_patrol}
+      DB_USERNAME: ${DB_USERNAME:-patrol}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: error
+      FILESYSTEM_DISK: local
+      APP_KEY: ${APP_KEY:-}
+    volumes:
+      - backend_storage:/var/www/html/storage
+      - backend_bootstrap_cache:/var/www/html/bootstrap/cache
+    depends_on:
+      mysql:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  # ---------- Frontend Vue (nginx: SPA + proxy /api → backend) ----------
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  backend_storage:
+  backend_bootstrap_cache:

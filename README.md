@@ -24,11 +24,13 @@ Web Dashboard (Vue 3) ────────┘
 
 ```
 security-patrol/
-├── backend/    Laravel 12 (REST API v1, Sanctum, MySQL) + 33 test
-├── frontend/   Vue 3 + Vite + Bootstrap 5 + Pinia + Leaflet
-├── android/    Aplikasi Android Kotlin (Retrofit + QR ZXing + GPS + offline sync)
-├── docs/       API_SPEC.md (untuk Android) + DEPLOYMENT.md (panduan server) + ANDROID_BUILD.md
-└── scripts/    pembantu dev: smoke-test.sh, e2e-patrol-test.sh, mysql*.sh
+├── backend/         Laravel 12 (REST API v1, Sanctum, MySQL) + 33 test
+├── frontend/        Vue 3 + Vite + Bootstrap 5 + Pinia + Leaflet
+├── android/         Aplikasi Android Kotlin (Retrofit + QR ZXing + GPS + offline sync)
+├── docs/            API_SPEC.md · DEPLOYMENT.md · ANDROID_BUILD.md · DOCKER.md
+├── docker-compose.yml   ← Docker: MySQL + PHP-FPM + Nginx (SPA) + scheduler
+├── .env.example         ← konfigurasi docker compose (salin ke .env)
+└── scripts/         pembantu dev: smoke-test.sh, e2e-patrol-test.sh, mysql*.sh
 ```
 
 ## Stack (sesuai dokumen)
@@ -78,9 +80,24 @@ progress real-time, selesai/batal patroli, riwayat + detail, dan **offline sync*
 
 Build & panduan lengkap: **[docs/ANDROID_BUILD.md](docs/ANDROID_BUILD.md)**.
 
+## Docker (Backend + Web) — Cara Paling Cepat
+
+Bundling **MySQL 8 + Laravel PHP-FPM + scheduler + Nginx (Vue SPA)** dalam satu
+perintah (opsi A: file Docker satu repo dengan aplikasi → versi selalu sinkron):
+
+```bash
+cp .env.example .env        # isi DB_PASSWORD & DB_ROOT_PASSWORD
+nano .env
+docker compose up -d --build
+# web: http://localhost:8080 · API: /api/v1 · health: /up
+```
+
+Panduan lengkap (service, akun demo, kustomisasi, troubleshooting):
+**[docs/DOCKER.md](docs/DOCKER.md)**.
+
 ## Deployment
 
-Baca **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — panduan lengkap Nginx +
+Baca **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — panduan klasik Nginx +
 PHP-FPM + MySQL + HTTPS + cron, termasuk konfigurasi server block siap salin.
 
 ## API untuk Android
