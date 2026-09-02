@@ -49,12 +49,24 @@ mkdir -p storage/app/public storage/framework/cache/data \
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
 # --- 3) tunggu database siap ---
+# Probe = koneksi PDO langsung (BUKAN `migrate:status`). Sebelumnya pakai
+# migrate:status, tapi di database baru (tabel migrasi belum ada) perintah itu
+# gagal "Migration table not found" → entrypoint mengira DB belum siap →
+# crash-loop padahal DB sehat & migrasi tak pernah jalan. PDO cek koneksi
+# saja, tidak butuh tabel apa pun.
 echo "[entrypoint] Menunggu database siap..."
 i=0
-until php artisan migrate:status >/dev/null 2>&1; do
+until php -r '
+    $host = getenv("DB_HOST") ?: "127.0.0.1";
+    $port = getenv("DB_PORT") ?: "3306";
+    $db   = getenv("DB_DATABASE") ?: "security_patrol";
+    $user = getenv("DB_USERNAME") ?: "root";
+    $pass = getenv("DB_PASSWORD") ?: "";
+    new PDO("mysql:host=$host;port=$port;dbname=$db", $user, $pass);
+' 2>/dev/null; do
     i=$((i + 1))
     if [ "$i" -ge 90 ]; then
-        echo "[entrypoint] Database tidak kunjung siap — keluar."
+        echo "[entrypoint] Database tidak kunjung siap — keluar. Cek log mysql & DB_PASSWORD/DB_ROOT_PASSWORD di .env." >&2
         exit 1
     fi
     sleep 2
