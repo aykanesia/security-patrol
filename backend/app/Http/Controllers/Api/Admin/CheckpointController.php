@@ -20,7 +20,6 @@ class CheckpointController extends Controller
             'status' => ['nullable', 'string', 'in:ACTIVE,INACTIVE'],
             'search' => ['nullable', 'string', 'max:100'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'all' => ['nullable', 'boolean'],
         ]);
 
         $query = Checkpoint::query()->with('area');
@@ -38,7 +37,9 @@ class CheckpointController extends Controller
             });
         }
 
-        if (! empty($validated['all'])) {
+        // `all` dari query string tiba sebagai string "true"/"false" (bukan bool),
+        // sehingga aturan 'boolean' menolaknya (422). $request->boolean() menormalkan.
+        if ($request->boolean('all')) {
             return ApiResponse::success($query->orderBy('code')->get()->map(fn ($c) => $this->payload($c)));
         }
 

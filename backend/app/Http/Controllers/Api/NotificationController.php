@@ -15,7 +15,6 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $validated = $request->validate([
-            'unread_only' => ['nullable', 'boolean'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
@@ -23,7 +22,9 @@ class NotificationController extends Controller
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at');
 
-        if (! empty($validated['unread_only'])) {
+        // `unread_only` query string tiba sebagai string "true"/"false", bukan bool;
+        // aturan 'boolean' menolaknya (422). $request->boolean() menormalkan.
+        if ($request->boolean('unread_only')) {
             $query->whereNull('read_at');
         }
 

@@ -35,6 +35,38 @@ class AdminApiTest extends TestCase
         ]);
     }
 
+    public function test_area_index_accepts_all_true_query_param(): void
+    {
+        // Bug: axios mengirim ?all=true sebagai string "true" → validasi
+        // 'boolean' Laravel menolaknya (422) → list area & dropdown CRUD mati.
+        $admin = $this->createUser(RoleName::SUPER_ADMIN);
+        $this->createArea('Area Satu');
+
+        $this->actingAs($admin)->getJson('/api/v1/admin/areas?all=true')
+            ->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_checkpoint_index_accepts_all_true_query_param(): void
+    {
+        $admin = $this->createUser(RoleName::SUPER_ADMIN);
+        $area = $this->createArea('Area CP');
+        \App\Models\Checkpoint::create([
+            'area_id' => $area->id,
+            'code' => 'CP-1',
+            'name' => 'Pos 1',
+            'latitude' => -6.26,
+            'longitude' => 106.79,
+            'radius_meter' => 30,
+            'status' => 'ACTIVE',
+        ]);
+
+        $this->actingAs($admin)->getJson('/api/v1/admin/checkpoints?all=true')
+            ->assertStatus(200)
+            ->assertJsonPath('success', true);
+    }
+
     public function test_supervisor_cannot_access_admin_crud(): void
     {
         $supervisor = $this->createUser(RoleName::SUPERVISOR);

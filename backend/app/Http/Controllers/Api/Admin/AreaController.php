@@ -18,7 +18,6 @@ class AreaController extends Controller
             'status' => ['nullable', 'string', 'in:ACTIVE,INACTIVE'],
             'search' => ['nullable', 'string', 'max:100'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'all' => ['nullable', 'boolean'],
         ]);
 
         $query = Area::query();
@@ -30,7 +29,10 @@ class AreaController extends Controller
             $query->where('name', 'like', '%' . $validated['search'] . '%');
         }
 
-        if (! empty($validated['all'])) {
+        // `all` di query string tiba sebagai string "true"/"false" (bukan bool),
+        // sehingga aturan 'boolean' Laravel menolaknya (422). Pakai $request->boolean()
+        // yang menormalisasi "true"/"1"/1 → true dan "false"/"0" → false.
+        if ($request->boolean('all')) {
             $items = $query->withCount(['checkpoints', 'routes'])->orderBy('name')->get();
 
             return ApiResponse::success($items->map(fn (Area $a) => $this->payload($a)));
