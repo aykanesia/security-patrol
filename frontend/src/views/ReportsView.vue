@@ -59,8 +59,36 @@ function exportCsv() {
     const from = `${monthly.year}-${String(monthly.month).padStart(2, '0')}-01`
     url = `/reports/export/range?from=${from}&to=${today.toISOString().slice(0, 10)}`
   }
-  const token = localStorage.getItem('sp_token')
-  window.open(`/api/v1${url}`, '_blank')
+  downloadWithToken(url)
+}
+
+// Unduh file dengan menyertakan token (window.open tidak bisa bawa header
+// Authorization, sehingga request export selalu ditolak 401/500 oleh backend).
+async function downloadWithToken(path) {
+  try {
+    const token = localStorage.getItem('sp_token')
+    const res = await fetch(`/api/v1${path}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      alert(body.message || `Export gagal (HTTP ${res.status})`)
+      return
+    }
+    const blob = await res.blob()
+    const disposition = res.headers.get('Content-Disposition') || ''
+    const m = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i)
+    const filename = m ? m[1] : 'laporan.csv'
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = decodeURIComponent(filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(link.href)
+  } catch (e) {
+    alert('Tidak dapat mengunduh file. Coba lagi.')
+  }
 }
 
 function durLabel(sec) {

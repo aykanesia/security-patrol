@@ -97,13 +97,20 @@ function render() {
 
 onMounted(async () => {
   await nextTick()
+  // Inisialisasi map hanya setelah data dimuat & container terlihat.
+  // Sebelumnya map dibuat saat `loading=true` (elemen masih display:none)
+  // → Leaflet mengukur ukuran 0 → peta terpotong/tidak sempurna.
+  await load()
+  await nextTick()
   map = L.map(mapEl.value).setView([-6.26, 106.79], 14)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap',
   }).addTo(map)
 
-  await load()
+  render()
+  // Pastikan ukuran peta benar setelah container tampil (mis. saat tab pertama dibuka)
+  setTimeout(() => map?.invalidateSize(), 100)
   timer = setInterval(load, 20000)
 })
 onUnmounted(() => {
