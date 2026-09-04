@@ -120,7 +120,7 @@ abstract class TestCase extends BaseTestCase
         $schedule = PatrolSchedule::create([
             'route_id' => $route->id,
             'name' => 'Jadwal Sekarang',
-            'day_of_week' => (int) now()->format('w'),
+            'day_of_week' => null, // null = berlaku setiap hari → window tidak bergantung jam berapa test dijalankan
             'start_time' => now()->subHour()->format('H:i:s'),
             'end_time' => now()->addHour()->format('H:i:s'),
             'grace_before_minutes' => 60,

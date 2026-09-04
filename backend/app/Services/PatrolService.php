@@ -444,60 +444,57 @@ class PatrolService
             throw new PatrolException('Jadwal tidak berlaku untuk hari ini', 'SCHEDULE_DAY_MISMATCH', 422);
         }
 
-        $start = Carbon::parse($schedule->start_time);
-        $end = Carbon::parse($schedule->end_time);
+        $graceBefore = $schedule->grace_before_minutes ?? 0;
+        $graceAfter = $schedule->grace_after_minutes ?? 0;
 
-        // handle overnight schedules (end < start => next day)
-        if ($end->lessThan($start)) {
-            $end = $end->addDay();
-        }
+        // Window boleh berlabuh di occurrence hari ini ATAU kemarin:
+        //  - jadwal dini hari (mis. 00:00 + grace) membuka window sejak malam sebelumnya;
+        //  - jadwal lintas tengah malam (end < start) masih aktif pada dini hari ini
+        //    dari occurrence kemarin.
+        foreach ([0, 1] as $daysBack) {
+            $anchor = $now->copy()->subDays($daysBack)->startOfDay();
 
-        $windowStart = $start->copy()->subMinutes($schedule->grace_before_minutes);
-        $windowEnd = $end->copy()->addMinutes($schedule->grace_after_minutes);
-
-        $nowTime = $now->copy()->setDateFrom($start); // normalize to same date basis
-
-        // If the schedule is overnight and we're before the window on the same
-        // day, the relevant window may have started the previous day.
-        if ($schedule->day_of_week !== null) {
-            $nowTime = $now->copy();
-            $candidate = $start->copy()->setDateFrom($now);
-
-            if ($now->lessThan($windowStart->setDateFrom($now))) {
-                // check previous-day window (overnight)
-                $prevStart = $start->copy()->setDateFrom($now->copy()->subDay());
-                $prevEnd = $end->copy()->setDateFrom($now->copy()->subDay());
-                if ($prevEnd->lessThan($prevStart)) {
-                    $prevEnd = $prevEnd->addDay();
+            if ($daysBack === 1) {
+                $anchorDow = (int) $anchor->format('w');
+                if (! $schedule->isActiveOnDay($anchorDow)) {
+                    continue;
                 }
-                $prevWindowStart = $prevStart->copy()->subMinutes($schedule->grace_before_minutes);
-                $prevWindowEnd = $prevEnd->copy()->addMinutes($schedule->grace_after_minutes);
-                if ($now->between($prevWindowStart, $prevWindowEnd)) {
-                    return;
-                }
+            }
+
+            $start = Carbon::parse($schedule->start_time)->setDateFrom($anchor);
+            $end = Carbon::parse($schedule->end_time)->setDateFrom($anchor);
+
+            if ($end->lessThan($start)) {
+                $end = $end->addDay(); // lintas tengah malam
+            }
+
+            $windowStart = $start->copy()->subMinutes($graceBefore);
+            $windowEnd = $end->copy()->addMinutes($graceAfter);
+
+            if ($now->between($windowStart, $windowEnd)) {
+                return;
             }
         }
 
-        // Normalize window dates to today for comparison
-        $windowStartDay = $windowStart->copy()->setDateFrom($now);
-        $windowEndDay = $windowEnd->copy()->setDateFrom($now);
-
-        // if window crosses midnight, allow until windowEnd on the next day
-        if ($windowEndDay->lessThan($windowStartDay)) {
-            $windowEndDay = $windowEndDay->addDay();
+        // Tidak ada window yang memuat now → tentukan arah error dari window hari ini.
+        $anchor = $now->copy()->startOfDay();
+        $start = Carbon::parse($schedule->start_time)->setDateFrom($anchor);
+        $end = Carbon::parse($schedule->end_time)->setDateFrom($anchor);
+        if ($end->lessThan($start)) {
+            $end = $end->addDay();
         }
+        $windowStart = $start->copy()->subMinutes($graceBefore);
+        $windowEnd = $end->copy()->addMinutes($graceAfter);
 
-        if ($now->lessThan($windowStartDay)) {
+        if ($now->lessThan($windowStart)) {
             throw new PatrolException('Belum waktunya memulai patroli', 'SCHEDULE_TOO_EARLY', 422, [
-                'window_start' => $windowStartDay->format('Y-m-d H:i:s'),
+                'window_start' => $windowStart->format('Y-m-d H:i:s'),
             ]);
         }
 
-        if ($now->greaterThan($windowEndDay)) {
-            throw new PatrolException('Jadwal patroli sudah berakhir', 'SCHEDULE_TOO_LATE', 422, [
-                'window_end' => $windowEndDay->format('Y-m-d H:i:s'),
-            ]);
-        }
+        throw new PatrolException('Jadwal patroli sudah berakhir', 'SCHEDULE_TOO_LATE', 422, [
+            'window_end' => $windowEnd->format('Y-m-d H:i:s'),
+        ]);
     }
 
     private function assertNoRunningSession(User $user): void

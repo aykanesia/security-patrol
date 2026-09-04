@@ -1,0 +1,11 @@
+name: security-patrol
+
+# ============================================================
+# Override lokal untuk host CPU lama (tanpa x86-64-v2).
+# Image mysql:8.0 (latest) butuh x86-64-v2 → fatal glibc error.
+# mysql:8.0.36 masih berjalan normal di CPU generasi lama.
+# Dipakai: docker compose -f docker-compose.yml -f docker-compose.override.yml
+# ============================================================
+services:
+  mysql:
+    image: mysql:8.0.36
