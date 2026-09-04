@@ -59,10 +59,6 @@ async function submit() {
             Masuk
           </button>
         </form>
-
-        <div class="text-center mt-4 small text-muted">
-          Demo: <code>admin</code> / <code>password</code>
-        </div>
       </div>
     </div>
   </div>
